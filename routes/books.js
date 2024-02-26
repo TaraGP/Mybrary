@@ -1,20 +1,9 @@
 import express, { Router } from "express";
 const router = express.Router();
-import multer from 'multer'; //picture libraray
-import path from 'path'; // what is the use
-import fs from 'fs'; // used to delete the bookcover that are not in the DB
-import Book, { coverImageBasePath }  from '../models/book.js';
+import Book from '../models/book.js';
 import Author from '../models/author.js';
 
-const uploadPath = path.join('public', coverImageBasePath); //public folder & coverImageBasePath are combined
-const imageMimeTypes = ['image/jpeg','image/png','image/gif']; //image types that will be accepted
-const upload = multer({
-    dest: uploadPath,
-    fileFilter: (req, file, callback)=>{ //which files to filter
-        callback(null, imageMimeTypes.includes(file.mimetype));
-    }
-});
-
+const imageMimeTypes = ['image/jpeg','image/png','image/gif, image/jpg']; //image types that will be accepted
 
 //All books route
 router.get('/', async(req,res)=>{
@@ -32,8 +21,8 @@ router.get('/', async(req,res)=>{
    try{
     const books = await query.exec();
     res.render('books/index',{
-       books:books,
-       searchOptions:req.query 
+       books: books,
+       searchOptions: req.query 
     });
    }catch{
     res.redirect('/');
@@ -41,38 +30,28 @@ router.get('/', async(req,res)=>{
 });
 
 router.get('/new', async(req,res)=>{
-    renderNewPage(res, new Book())
+    renderNewPage(res, new Book());
 });
 
-//create book route
-router.post('/', upload.single('cover'),async (req,res)=>{ //upload only a single file ,its name is cover--multer will create,upload store in correct folder
-    const fileName = req.file != null ? req.file.filename :null //multer requires a file name 
+
+router.post('/', async(req,res)=>{
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
         publishDate: new Date(req.body.publishDate),
         pageCount: req.body.pageCount,
-        coverImageName: fileName,
-        description:req.body.description
-     });
-
-     try{
-        const newBook = await book.save();
-        res.redirect('books');
-     }
-     catch{
-        if(book.coverImageName != null){
-            removeBookCover(book.coverImageName);
-        }
-        renderNewPage(res.book,true);
-     }
-});
-
-function removeBookCover(fileName){
-    fs.unlink(path.join(uploadPath,fileName),err =>{
-        if(err) console.error(err);
+        description: req.body.description
     });
-}
+    saveCover(book, req.body.cover);//save book & encoded json cover into our request
+
+    try{
+        const newBook = await book.save();
+        res.redirect('books'); 
+    }
+    catch{
+        renderNewPage(res, book, true);
+    }
+});
 
 async function renderNewPage(res, book, hasError =  false){//no error indicator using hasError
    try{
@@ -88,5 +67,20 @@ async function renderNewPage(res, book, hasError =  false){//no error indicator 
     res.redirect('/books');
    }
 }
-export { router as bookRouter };
 
+function saveCover(book, coverEncoded){
+    console.log('Cover Encoded:', coverEncoded); // Log coverEncoded to inspect its value
+    if(coverEncoded == null) return;
+    try{
+    const cover = JSON.parse(coverEncoded);
+    if(cover != null && imageMimeTypes.includes(cover.type)){
+        book.coverImage = new Buffer.from(cover.data, `base64`);//base 64 to data conversion & then storing in a buffer
+        book.coverImageType = cover.type; //book covers are not stored on the server
+    }}
+    catch (e)
+    {
+        console.error(e); 
+    }
+}
+
+export { router as bookRouter };

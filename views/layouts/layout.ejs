@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, intital-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+    <script defer src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script defer src="https://unpkg.com/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.js"></script>
+    <script defer src="https://unpkg.com/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.js"></script>
+    <!-- next sentence is loading the file pond library-->
+    <script defer src="https://unpkg.com/filepond/dist/filepond.js"></script>
+    <script defer src="/javascripts/fileUpload.js"></script><!-- actual file pond libraray set up in javascripts folder  -->
     <title> Mybrary</title>
 </head>
 <body>
@@ -12,3 +20,13 @@
    <%- body %>
 </body>
 </html>
+
+<!--When using <link href=””>  browser doesn't stop to parse the page, 
+    as the browser knows that it's just a style sheet.
+
+Whereas in other case, when we use <script src="">  browser knows that 
+    it's a JavaScript file, so the parsing and processing of page is 
+    stopped in order to fetch compile and execute the external file.
+
+Thus, it's a good practice to keep the external JS files, 
+at the bottom of the webpage-->

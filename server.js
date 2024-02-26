@@ -10,6 +10,8 @@
   import {authorRouter} from './routes/authors.js';
   import {bookRouter} from './routes/books.js';
   import bodyParser from 'body-parser';
+  import * as FilePond from 'filepond';
+  import FilePondPluginFileEncode from 'filepond-plugin-file-encode';
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
